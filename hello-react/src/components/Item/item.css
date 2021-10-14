@@ -1,0 +1,12 @@
+.item{
+  border-bottom: 1px solid #e2e2e2;
+  padding: 6px 0;
+  display: flex;
+  justify-content: space-between;
+}
+.btn-del {
+  background: red;
+  outline: none;
+  color: #fff;
+  border: 0;
+}

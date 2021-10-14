@@ -1,0 +1,19 @@
+.footer{
+  position: absolute;
+  bottom: 0;
+  border-top: 1px solid #e2e2e2;
+  width: 90%;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.btn-remove{
+  background-color: rgb(245, 80, 80);
+  border: 1px solid rgb(241, 76, 76);
+  font-size: 12px;
+  color: white;
+  outline: none;
+}
+.btn-remove:hover, .btn-remove:active{
+  background-color: red;
+}
