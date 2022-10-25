@@ -2,11 +2,12 @@
  * @Author: hySmart 906325802@qq.com
  * @Date: 2022-10-09 22:41:06
  * @LastEditors: hySmart 906325802@qq.com
- * @LastEditTime: 2022-10-19 23:18:43
+ * @LastEditTime: 2022-10-25 23:20:11
  * @FilePath: \react-project\basic\src\react-dom.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 import { REACT_TEXT } from "./constant"
+import { addEvent } from './event'
 
 export function createDOM(vdom) {
   // 判别虚拟dom类型，根据类型生成对应的节点元素
@@ -46,6 +47,9 @@ function updateProps(dom, oldProps={}, newProps={}) {
       for(let attr in styleObj) {
         dom.style[attr] = styleObj[attr]
       }
+    } else if(/^on[A-Z].*/.test(key)) {
+      // dom[key.toLowerCase()] = newProps[key]
+      addEvent(dom, key.toLocaleLowerCase(), newProps[key])
     }else {
       dom[key] = newProps[key]
     }
@@ -75,14 +79,32 @@ function mount(vdom, container) {
 function mountFunctionComponent(vdom) {
   const {type, props} = vdom
   const renderVdom = type(props)
+  vdom.oldRenderVDom = renderVdom
   return createDOM(renderVdom)
 }
 
 function mountClassComponent(vdom) {
   const {type, props} = vdom
-  const vdomInstance = new type(props)
-  const renderVdom = vdomInstance.render()
+  const classInstance = new type(props)
+  const renderVdom = classInstance.render()
+  classInstance.oldRenderVDom = renderVdom
   return createDOM(renderVdom)
+}
+
+export function findDOM(vdom) {
+  if(!vdom) return null
+  if(vdom.dom) {
+    return vdom.dom
+  }else{
+    let renderVdom = vdom.oldRenderVDom
+    return findDOM(renderVdom)
+  }
+}
+
+export function compareTwoVDom(parentDom, oldVDOM, newVdom) {
+  let oldDOM = findDOM(oldVDOM)
+  let newDOM = createDOM(newVdom)
+  parentDom.replaceChild(newDOM, oldDOM)
 }
 const ReactDOM = {
   render
