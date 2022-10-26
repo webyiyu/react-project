@@ -2,11 +2,11 @@
  * @Author: hySmart 906325802@qq.com
  * @Date: 2022-10-09 22:41:06
  * @LastEditors: hySmart 906325802@qq.com
- * @LastEditTime: 2022-10-19 23:15:46
+ * @LastEditTime: 2022-10-26 23:32:34
  * @FilePath: \react-project\basic\src\react.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import {REACT_ELEMENT} from './constant'
+import {REACT_ELEMENT, REACT_FORWARD} from './constant'
 import {Component} from './component'
 import { wrapToVdom } from './utils';
 // createElement 就是生成一个虚拟dom
@@ -37,8 +37,27 @@ function createElement(type, config, children) {
     props
   }
 }
+
+/*
+  createRef 就是默认返回一个对象 {current: null}
+  createDOM时， 如果vdom有ref :
+    1、如果ref指向的是真实DOM,ref.current赋值为dom
+    2、如果ref指向的是一个类组件， 则在创建类组件函数中,ref.current 赋值为类的实例
+    3、如果ref指向的是一个函数组件，不可以直接使用ref，需使用React.forwardRef()
+*/ 
+function createRef() {
+  return {current: null}
+}
+function forwardRef(render) {
+  return {
+    $$typeof: REACT_FORWARD,
+    render
+  }
+}
 const React = {
   createElement,
-  Component
+  Component,
+  createRef,
+  forwardRef,
 }
 export default React

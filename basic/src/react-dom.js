@@ -2,19 +2,21 @@
  * @Author: hySmart 906325802@qq.com
  * @Date: 2022-10-09 22:41:06
  * @LastEditors: hySmart 906325802@qq.com
- * @LastEditTime: 2022-10-25 23:20:11
+ * @LastEditTime: 2022-10-26 23:49:17
  * @FilePath: \react-project\basic\src\react-dom.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { REACT_TEXT } from "./constant"
+import { REACT_TEXT, REACT_FORWARD } from "./constant"
 import { addEvent } from './event'
 
 export function createDOM(vdom) {
   // 判别虚拟dom类型，根据类型生成对应的节点元素
   // 绑定props
-  let {type, props} = vdom
+  let {type, props, ref} = vdom
   let dom;
-  if (type === REACT_TEXT) {
+  if(type && type.$$typeof === REACT_FORWARD) {
+    return mountForwardComponent(vdom)
+  }else if (type === REACT_TEXT) {
     dom = document.createTextNode(props);
   } else if(typeof type === 'function') {
     if(type.isReactComponent) {
@@ -34,6 +36,7 @@ export function createDOM(vdom) {
     }
   }
   vdom.dom = dom
+  if(ref) ref.current = dom
   return dom
 }
 
@@ -84,13 +87,20 @@ function mountFunctionComponent(vdom) {
 }
 
 function mountClassComponent(vdom) {
-  const {type, props} = vdom
+  const {type, props, ref} = vdom
   const classInstance = new type(props)
+  if(ref) ref.current = classInstance
   const renderVdom = classInstance.render()
   classInstance.oldRenderVDom = renderVdom
   return createDOM(renderVdom)
 }
 
+function mountForwardComponent(vdom) {
+  const {type, props, ref} = vdom
+  let renderVdom = type.render(props, ref)
+  vdom.oldRenderVDom = renderVdom
+  return createDOM(renderVdom)
+}
 export function findDOM(vdom) {
   if(!vdom) return null
   if(vdom.dom) {

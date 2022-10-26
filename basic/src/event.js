@@ -2,7 +2,7 @@
  * @Author: hySmart 906325802@qq.com
  * @Date: 2022-10-25 22:50:56
  * @LastEditors: hySmart 906325802@qq.com
- * @LastEditTime: 2022-10-25 23:06:49
+ * @LastEditTime: 2022-10-25 23:28:31
  * @FilePath: \react-project\basic\src\event.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -21,7 +21,7 @@ function dispatchEvent(event) {
   let { target, type } = event;
   let eventType = `on${type}`;
   let syntheticEvent = createSyntheticEvent(event);
-  updateQueue.isBatchingUpdate = true;
+  updateQueue.isBathingUpdate = true;
   while (target) {
     let { store } = target;
     let handler = store && store[eventType]
