@@ -162,11 +162,49 @@ class Counter extends React.Component{
     return (
      <div>
       <div>number: {this.state.number}</div>
+      <div>
+        {
+          this.state.number === 4 ? null : <ChildCounter count={this.state.number} />
+        }
+      </div>
       <button onClick={this.handleAddClick}>添加</button>
      </div>
     )
   }
 
+}
+class ChildCounter extends React.Component {
+  constructor(props) {
+    super(props)
+    console.log('child constructor')
+  }
+  componentWillReceiveProps(nextProps) {
+    console.log('child componentWillReceive', nextProps)
+  }
+  componentWillMount() {
+    console.log('child componentWillMount')
+  }
+  componentDidMount() {
+    console.log('child componentDidMount')
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log('child shouldComponentUpdate')
+    return true
+  }
+  componentWillUpdate() {
+    console.log('child componentWillUpdate')
+  }
+  componentDidUpdate() {
+    console.log('child componentDidUpdate')
+  }
+  render() {
+    console.log('child render')
+    return (
+      <div>
+        <p>{this.props.count}</p>
+      </div>
+    )
+  }
 }
 ReactDOM.render(class1, document.getElementById("root"));
 ReactDOM.render(<Sum />, document.getElementById("root"));
