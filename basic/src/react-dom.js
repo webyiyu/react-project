@@ -76,8 +76,12 @@ function render(vdom, container) {
 function mount(vdom, container) {
   // 虚拟dom生成一个真实dom
   const newDOM = createDOM(vdom)
-  // 真实dom挂载到容器内
-  container.appendChild(newDOM)
+  if(newDOM) {
+    // 真实dom挂载到容器内
+    container.appendChild(newDOM)
+    if(newDOM.componentDidMount) newDOM.componentDidMount()
+  }
+ 
 }
 function mountFunctionComponent(vdom) {
   const {type, props} = vdom
@@ -90,9 +94,14 @@ function mountClassComponent(vdom) {
   const {type, props, ref} = vdom
   const classInstance = new type(props)
   if(ref) ref.current = classInstance
+  if(classInstance.componentWillMount) classInstance.componentWillMount()
   const renderVdom = classInstance.render()
   classInstance.oldRenderVDom = renderVdom
-  return createDOM(renderVdom)
+  const dom = createDOM(renderVdom)
+  if(classInstance.componentDidMount) {
+    dom.componentDidMount = classInstance.componentDidMount.bind(classInstance)
+  }
+  return dom
 }
 
 function mountForwardComponent(vdom) {

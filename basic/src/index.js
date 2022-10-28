@@ -124,7 +124,52 @@ class TextInput extends React.Component{
 // const func1 = <FunctionComponent msg='world'></FunctionComponent>
 // ReactDOM.render(element1, document.getElementById("root"));
 // console.log(func1)
+
+// 生命周期测试
+class Counter extends React.Component{
+  constructor(props) {
+    super(props)
+    this.state = {
+      number: 0,
+    }
+    console.log('1 constructor')
+  }
+  componentWillMount() {
+    console.log('2 componentWillMount')
+  }
+
+  componentDidMount() {
+    console.log('4 componentDidMount')
+  }
+  handleAddClick = ()=>{
+    this.setState({
+      number: this.state.number + 1
+    })
+  }
+  shouldComponentUpdate() {
+    console.log('5 shouldComponentUpdate')
+    return this.state.number % 2 === 0
+  }
+  componentWillUpdate() {
+    console.log('6 componentWillUpdate')
+  }
+  componentDidUpdate() {
+   console.log('7 componentDidUpdate')
+  }
+
+  render() {
+    console.log('3 render')
+    return (
+     <div>
+      <div>number: {this.state.number}</div>
+      <button onClick={this.handleAddClick}>添加</button>
+     </div>
+    )
+  }
+
+}
 ReactDOM.render(class1, document.getElementById("root"));
 ReactDOM.render(<Sum />, document.getElementById("root"));
 ReactDOM.render(<Form />, document.getElementById("root"));
+ReactDOM.render(<Counter />, document.getElementById("root"))
 

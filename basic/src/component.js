@@ -31,8 +31,9 @@ class Updater{
     }
     this.emitUpdate()
   }
-  emitUpdate() {
+  emitUpdate(nextProps) {
     // 判别是否是批量更新
+    this.nextProps = nextProps
     if(updateQueue.isBathingUpdate) {
       updateQueue.updaters.add(this)
     }else{
@@ -41,8 +42,8 @@ class Updater{
   }
   updateComponent() {
     let {classInstance, pendingStates} = this
-    if(pendingStates.length > 0) {
-      shouldUpdate(classInstance, this.getState())
+    if(this.nextProps || pendingStates.length > 0) {
+      shouldUpdate(classInstance, this.nextProps,this.getState())
     }
   }
   getState() {
@@ -58,9 +59,23 @@ class Updater{
     return state
   }
 }
-function shouldUpdate(classInstance, nextState){
+function shouldUpdate(classInstance, nextProps, nextState){
+  // shouldComponentUpdate钩子需要reture一个布尔值，如果无返回会报错，
+  // 如果返回了false 则不进行后续更新
+  let willUpdate = true
+  if(classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
+    willUpdate = false
+  }
+  if(willUpdate && classInstance.componentWillUpdate) {
+    classInstance.componentWillUpdate()
+  }
+  if(nextProps) {
+    classInstance.props = nextProps
+  }
   classInstance.state = nextState
-  classInstance.forceUpdate()
+  if(willUpdate) {
+    classInstance.forceUpdate()
+  }
 }
 export class Component {
   static isReactComponent = true
@@ -78,5 +93,8 @@ export class Component {
     let newRenderVDom = this.render()
     compareTwoVDom(oldDOM.parentNode, oldRenderVDom, newRenderVDom)
     this.oldRenderVDom = newRenderVDom
+    if(this.componentDidUpdate) {
+      this.componentDidUpdate(this.props, this.state)
+    }
   }
 }
