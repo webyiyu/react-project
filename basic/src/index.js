@@ -206,8 +206,35 @@ class ChildCounter extends React.Component {
     )
   }
 }
+
+class List extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      lists: ['A','B','C','D','E','F']
+    }
+  }
+  handleChange = ()=>{
+    this.setState({
+      lists: ['A','C','E','B','G']
+    })
+  }
+  render() {
+    return (
+      <React.Fragment>
+        <ul>
+          {
+            this.state.lists.map(item=> <li key={item}>{item}</li>)
+          }
+        </ul>
+        <button onClick={this.handleChange}>切换diff</button>
+      </React.Fragment>
+    )
+  }
+}
 ReactDOM.render(class1, document.getElementById("root"));
 ReactDOM.render(<Sum />, document.getElementById("root"));
 ReactDOM.render(<Form />, document.getElementById("root"));
 ReactDOM.render(<Counter />, document.getElementById("root"))
+ReactDOM.render(<List />, document.getElementById("root"))
 
