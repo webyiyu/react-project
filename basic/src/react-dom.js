@@ -2,11 +2,19 @@
  * @Author: hySmart 906325802@qq.com
  * @Date: 2022-10-09 22:41:06
  * @LastEditors: hySmart 906325802@qq.com
- * @LastEditTime: 2022-10-26 23:49:17
+ * @LastEditTime: 2022-11-01 22:21:36
  * @FilePath: \react-project\basic\src\react-dom.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import { REACT_TEXT, REACT_FORWARD, PLACEMENT, MOVE, REACT_FRAGMENT} from "./constant"
+import { 
+  REACT_TEXT, 
+  REACT_FORWARD, 
+  PLACEMENT, 
+  MOVE, 
+  REACT_FRAGMENT,
+  REACT_PROVIDER,
+  REACT_CONTEXT
+} from "./constant"
 import { addEvent } from './event'
 
 export function createDOM(vdom) {
@@ -14,7 +22,11 @@ export function createDOM(vdom) {
   // 绑定props
   let {type, props, ref} = vdom
   let dom;
-  if(type && type.$$typeof === REACT_FORWARD) {
+  if(type && type.$$typeof === REACT_CONTEXT){
+    return mountContextComponent(vdom)
+  }else if(type && type.$$typeof === REACT_PROVIDER){
+    return mountProviderComponent(vdom)
+  }else if(type && type.$$typeof === REACT_FORWARD) {
     return mountForwardComponent(vdom)
   }else if (type === REACT_TEXT) {
     dom = document.createTextNode(props);
@@ -41,6 +53,23 @@ export function createDOM(vdom) {
   vdom.dom = dom
   if(ref) ref.current = dom
   return dom
+}
+
+function mountProviderComponent(vdom) {
+  let {type, props} = vdom
+  let context = type._context
+  context._currentValue = props.value
+  let renderVdom = props.children
+  vdom.oldRenderVDom = renderVdom
+  return createDOM(renderVdom)
+}
+
+function mountContextComponent(vdom) {
+  let {type, props} = vdom
+  let context = type._context
+  let renderVdom = props.children(context._currentValue)
+  vdom.oldRenderVDom = renderVdom
+  return createDOM(renderVdom)
 }
 
 function updateProps(dom, oldProps={}, newProps={}) {
@@ -97,6 +126,9 @@ function mountFunctionComponent(vdom) {
 function mountClassComponent(vdom) {
   const {type, props, ref} = vdom
   const classInstance = new type(props)
+  if(type.contextType) {
+    classInstance.context = type.contextType._currentValue
+  }
   vdom.classInstance = classInstance
   if(ref) ref.current = classInstance
   if(classInstance.componentWillMount) classInstance.componentWillMount()
@@ -126,6 +158,7 @@ export function findDOM(vdom) {
 }
 
 export function compareTwoVDom(parentDom, oldVDOM, newVdom, nextDOM) {
+  console.log(oldVDOM, newVdom)
   // 新老节点比较
   // let oldDOM = findDOM(oldVDOM)
   // let newDOM = createDOM(newVdom)
@@ -180,7 +213,11 @@ function unMountVdom(vdom) {
 
 function updateElement(oldVdom, newVdom) {
 // 如果是文本 直接替换新节点的文本内容
-  if(oldVdom.type === REACT_TEXT) {
+  if(oldVdom.type.$$typeof === REACT_PROVIDER) {
+    updateProviderComponent(oldVdom, newVdom)
+  }else if(oldVdom.type.$$typeof === REACT_CONTEXT) {
+    updateContextComponent(oldVdom, newVdom)
+  }else if(oldVdom.type === REACT_TEXT) {
     let currentDom = newVdom.dom = findDOM(oldVdom)
     if(oldVdom.props !== newVdom.props) {
       currentDom.textContent = newVdom.props
@@ -289,6 +326,25 @@ function updateFunctionComponent(oldVdom, newVdom) {
   let newRenderVDom = type(props)
   compareTwoVDom(parentDom, oldVdom.oldRenderVDom, newRenderVDom)
   newVdom.oldRenderVDom = newRenderVDom
+}
+
+function updateContextComponent(oldVdom, newVdom) {
+  let parentDOM = findDOM(oldVdom).parentNode;
+  let { type, props } = newVdom;
+  let context = type._context;
+  let renderVdom = props.children(context._currentValue);
+  compareTwoVDom(parentDOM, oldVdom.oldRenderVDom, renderVdom);
+  newVdom.oldRenderVDom = renderVdom;
+
+}
+function updateProviderComponent(oldVdom, newVdom) {
+  let parentDOM = findDOM(oldVdom).parentNode;
+  let { type, props } = newVdom;
+  let context = type._context;
+  context._currentValue = props.value;
+  let renderVdom = props.children;
+  compareTwoVDom(parentDOM, oldVdom.oldRenderVDom, renderVdom);
+  newVdom.oldRenderVDom = renderVdom;
 }
 const ReactDOM = {
   render

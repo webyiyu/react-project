@@ -6,7 +6,7 @@
  * @FilePath: \react-project\basic\src\react.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import {REACT_ELEMENT, REACT_FORWARD, REACT_FRAGMENT} from './constant'
+import {REACT_ELEMENT, REACT_FORWARD, REACT_FRAGMENT, REACT_PROVIDER, REACT_CONTEXT} from './constant'
 import {Component} from './component'
 import { wrapToVdom } from './utils';
 // createElement 就是生成一个虚拟dom
@@ -54,11 +54,27 @@ function forwardRef(render) {
     render
   }
 }
+
+function createContext() {
+  let context = {
+    _currentValue: undefined,
+  }
+  context.Provider = {
+    $$typeof: REACT_PROVIDER,
+    _context: context
+  }
+  context.Consumer = {
+    $$typeof: REACT_CONTEXT,
+    _context: context
+  }
+  return context
+}
 const React = {
   createElement,
   Component,
   createRef,
   forwardRef,
-  Fragment: REACT_FRAGMENT
+  Fragment: REACT_FRAGMENT,
+  createContext
 }
 export default React
